@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_document_picker/flutter_document_picker.dart';
 
 class HomePage extends StatefulWidget{
   @override
@@ -8,15 +8,151 @@ class HomePage extends StatefulWidget{
 }
 
 class HomePageState extends State<HomePage>{
-  final TextEditingController name = new TextEditingController();
-  var nameField;
-  var _image;
 
-  Future _askUser() async{
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-    setState((){
-      _image = image;
+  String _path = '-';
+  bool _pickFileInProgress = false;
+  bool _iosPublicDataUTI = true;
+  bool _checkByCustomExtension = false;
+
+  final _utiController = TextEditingController(
+    text: 'com.sidlatau.example.mwfbak',
+  );
+
+  final _extensionController = TextEditingController(
+    text: 'mwfbak',
+  );
+
+  _documentPicker() async{
+    String result;
+    try{
+      setState((){
+        _path = '-';
+        _pickFileInProgress = true;
+      });
+
+      FlutterDocumentPickerParams params = FlutterDocumentPickerParams(
+        allowedFileExtensions:
+        _checkByCustomExtension ? [_extensionController.text] : null,
+        allowedUtiTypes: _iosPublicDataUTI ? null : [_utiController.text],
+      );
+
+      result = await FlutterDocumentPicker.openDocument(params: params);
+    } catch (e){
+      result = "Error: $e";
+    } finally {
+      setState(() {
+        _pickFileInProgress = false;
+      });
+    }
+
+    setState(() {
+      _path = result;
     });
+  }
+
+  _buildIOSParams() {
+    return Padding(
+      padding: EdgeInsets.only(top: 24.0),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Text(
+                  'iOS Params',
+                  style: Theme.of(context).textTheme.headline,
+                ),
+              ),
+              Text(
+                'Example app is configured to pick custom document type with extension ".mwfbak"',
+                style: Theme.of(context).textTheme.body1,
+              ),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      'Allow pick all documents("public.data" UTI will be used).',
+                      softWrap: true,
+                    ),
+                  ),
+                  Checkbox(
+                    value: _iosPublicDataUTI,
+                    onChanged: (value) {
+                      setState(() {
+                        _iosPublicDataUTI = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              TextField(
+                controller: _utiController,
+                enabled: !_iosPublicDataUTI,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Uniform Type Identifier to pick:',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  _buildCommonParams() {
+    return Padding(
+      padding: EdgeInsets.only(top: 24.0),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Text(
+                  'Common Params',
+                  style: Theme.of(context).textTheme.headline,
+                ),
+              ),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Text(
+                        'Check file by extension - if picked file does not have wantent extension - return "extension_mismatch" error',
+                        softWrap: true,
+                      ),
+                    ),
+                  ),
+                  Checkbox(
+                    value: _checkByCustomExtension,
+                    onChanged: (value) {
+                      setState(() {
+                        _checkByCustomExtension = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              TextField(
+                controller: _extensionController,
+                enabled: _checkByCustomExtension,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'File extension to pick:',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
 
@@ -26,21 +162,22 @@ class HomePageState extends State<HomePage>{
       appBar: new AppBar(
         title: new Text("File Manager"),
       ),
-      body: new Container(
+      body: Container(
         child: new Center(
           child: new Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              _button("hello", _askUser),
-              Image.file(_image),
-              new TextField(
-                controller: name,
-                onChanged: (String newString){
-                  setState(() {
-                    nameField = name.text;
-                  });
-                },
+              _button("Pick a File", _documentPicker),
+              Text(
+                'Picked file path:',
+                style: Theme.of(context).textTheme.title,
               ),
+              Text('$_path'),
+              _pickFileInProgress ? CircularProgressIndicator() : Container(),
+              _buildCommonParams(),
+              Theme.of(context).platform == TargetPlatform.iOS
+                ? _buildIOSParams()
+                : Container(),
             ],
           ),
         )
