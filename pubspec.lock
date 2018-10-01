@@ -8,6 +8,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.32.4"
+  archive:
+    dependency: "direct main"
+    description:
+      name: archive
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.4"
   args:
     dependency: transitive
     description:
@@ -82,7 +89,7 @@ packages:
       name: flutter_document_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.1"
+    version: "1.1.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -215,12 +222,19 @@ packages:
     source: hosted
     version: "1.0.4"
   path:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.2"
+  path_provider:
+    dependency: "direct main"
+    description:
+      name: path_provider
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.1"
   plugin:
     dependency: transitive
     description:
@@ -389,3 +403,4 @@ packages:
     version: "2.1.15"
 sdks:
   dart: ">=2.0.0-dev.68.0 <3.0.0"
+  flutter: ">=0.1.4 <2.0.0"
